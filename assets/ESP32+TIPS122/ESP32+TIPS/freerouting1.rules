@@ -1,0 +1,76 @@
+
+(rules PCB freerouting.dsn
+  (snap_angle 
+    fortyfive_degree
+  )
+  (autoroute_settings
+    (fanout off)
+    (autoroute on)
+    (postroute on)
+    (vias on)
+    (via_costs 50)
+    (plane_via_costs 5)
+    (start_ripup_costs 100)
+    (start_pass_no 1)
+    (layer_rule F.Cu
+      (active off)
+      (preferred_direction vertical)
+      (preferred_direction_trace_costs 1.0)
+      (against_preferred_direction_trace_costs 3.7)
+    )
+    (layer_rule B.Cu
+      (active on)
+      (preferred_direction horizontal)
+      (preferred_direction_trace_costs 1.0)
+      (against_preferred_direction_trace_costs 3.3)
+    )
+  )
+  (rule
+    (width 700.0)
+    (clearance 200.0)
+    (clearance 125.0 (type smd_to_turn_gap))
+    (clearance 50.0 (type smd))
+    (clearance 200.0 (type "kicad_default"))
+  )
+  (padstack "Via[0-1]_800:400_um"
+    (shape
+      (circle F.Cu 800.0 0.0 0.0)
+    )
+    (shape
+      (circle B.Cu 800.0 0.0 0.0)
+    )
+    (attach off)
+  )
+  (via 
+    "Via[0-1]_800:400_um" "Via[0-1]_800:400_um" default
+  )
+  (via 
+    "Via[0-1]_800:400_um-kicad_default" "Via[0-1]_800:400_um" "kicad_default"
+  )
+  (via_rule
+    default "Via[0-1]_800:400_um"
+  )
+  (via_rule
+    "kicad_default" "Via[0-1]_800:400_um-kicad_default"
+  )
+  (class "kicad_default"
+    "Net-(U2-D4)" "Net-(Q1-B)" "Net-(U2-D5)" "Net-(Q2-B)" "Net-(Q3-B)" "Net-(U2-D12)" "Net-(U2-D13)" "Net-(Q4-B)"
+    "Net-(U2-D14)" "Net-(Q5-B)" "Net-(U2-D15)" "Net-(Q6-B)" "Net-(Q7-B)" "Net-(U2-RX2)" "Net-(Q8-B)" "Net-(U2-TX2)"
+    "Net-(U2-D21)" "Net-(Q9-B)" "Net-(U2-D22)" "Net-(Q10-B)" "Net-(Q11-B)" "Net-(U2-D25)" "Net-(U2-TX0)" "Net-(Q12-B)"
+    "Net-(U2-RX0)" "Net-(Q13-B)" "Net-(Q14-B)" "Net-(U2-D27)" "Net-(Q15-B)" "Net-(U2-D32)" "Net-(U2-D33)" "Net-(Q16-B)"
+    "Net-(U2-D34)" "Net-(Q17-B)" "Net-(U2-D35)" "Net-(Q18-B)" "Net-(Q19-B)" "Net-(U2-D26)" "Net-(Q20-B)" "Net-(U2-D2)"
+    "Net-(J1-Pin_2)" "Net-(J1-Pin_1)" "Net-(J1-Pin_3)" "unconnected-(J2-P22-Pad22)" "Net-(Q7-C)" "Net-(J2-P16)" "Net-(Q12-C)" "unconnected-(J2-P21-Pad21)"
+    "Net-(J2-P15)" "Net-(Q5-C)" "Net-(Q3-C)" "Net-(J2-P18)" "Net-(Q2-C)" "unconnected-(J2-P23-Pad23)" "Net-(Q9-C)" "Net-(Q8-C)"
+    "Net-(J2-P14)" "Net-(Q4-C)" "Net-(Q1-C)" "unconnected-(J2-P24-Pad24)" "Net-(Q13-C)" "Net-(Q6-C)" "Net-(Q10-C)" "Net-(J2-P20)"
+    "Net-(Q20-C)" "Net-(J2-P19)" "Net-(J2-P17)" "unconnected-(J2-P25-Pad25)" GND "unconnected-(U2-3V3-Pad1)" "unconnected-(U2-EN-Pad16)" "unconnected-(U2-VP-Pad17)"
+    "unconnected-(U2-VN-Pad18)" VCC
+    (clearance_class "kicad_default")
+    (via_rule "kicad_default")
+    (rule
+      (width 700.0)
+    )
+    (circuit 
+      (use_layer F.Cu B.Cu)
+    )
+  )
+)
