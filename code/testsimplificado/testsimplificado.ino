@@ -20,7 +20,7 @@ const int MATRIX_COLS = 96;
 uint8_t ledMatrix[MATRIX_ROWS][MATRIX_COLS];
 int scrollOffset = 0;
 unsigned long lastScroll = 0;
-const unsigned long scrollInterval = 100;  // ms entre pasos
+const unsigned long scrollInterval = 1000;  // ms entre pasos
 
 // Envía 24 bits a los 74HC595
 void enviarDatos(uint32_t data) {

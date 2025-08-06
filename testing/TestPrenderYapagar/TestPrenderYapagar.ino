@@ -22,7 +22,7 @@ bool encendida = true;
 unsigned long previousMillis = 0;
 
 // Control de brillo (0 = apagado, 255 = máximo)
-uint8_t brillo = 50;  // Puedes ajustar este valor
+uint8_t brillo = 100;  // Puedes ajustar este valor
 
 void setup() {
   // Pines del shift register
