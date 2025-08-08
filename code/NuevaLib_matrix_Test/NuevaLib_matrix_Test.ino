@@ -1,3 +1,4 @@
+
 #include <Arduino.h>
 #include <ShiftRegister74HC595.h>  // https://blog.timodenk.com/shift-register-arduino-library/
 
@@ -6,15 +7,16 @@
 
 
 // === CONFIGURACIÓN DE PINES ===
-#define DATA_PIN  23  // DS
-#define CLOCK_PIN 18  // SHCP
-#define LATCH_PIN 19  // STCP
+int numberOfShiftRegisters = 3;  // number of shift registers attached in series
+int serialDataPin = 23;          // DS
+int clockPin = 18;               // SHCP
+int latchPin = 19;               // STCP
 
 #define MATRIX_ROWS 20
 #define MATRIX_COLS 24
 
 // Instancia del shift register (3 x 74HC595 = 24 salidas)
-ShiftRegister74HC595<3> sr(DATA_PIN, CLOCK_PIN, LATCH_PIN);
+ShiftRegister74HC595<3> sr(serialDataPin, clockPin, latchPin);
 
 // === Pines de filas conectadas a TIP122 ===
 const uint8_t filas[MATRIX_ROWS] = {
@@ -28,8 +30,8 @@ const uint8_t filas[MATRIX_ROWS] = {
 void prender(uint8_t x, uint8_t y) {
   if (x >= MATRIX_COLS || y >= MATRIX_ROWS) return;
 
-  sr.setAllLow();  // Apaga todas las columnas
-  sr.set(x, HIGH); // Activa columna X
+  sr.setAllLow();   // Apaga todas las columnas
+  sr.set(x, HIGH);  // Activa columna X
 
   // Apaga todas las filas
   for (int i = 0; i < MATRIX_ROWS; i++) {
@@ -44,7 +46,7 @@ void apagar(uint8_t x, uint8_t y) {
   if (x >= MATRIX_COLS || y >= MATRIX_ROWS) return;
 
   sr.set(x, LOW);                // Apaga columna X
-  digitalWrite(filas[y], HIGH); // Apaga fila Y
+  digitalWrite(filas[y], HIGH);  // Apaga fila Y
 }
 
 void setup() {
@@ -64,6 +66,6 @@ void loop() {
   prender(5, 10);  // Prender LED en columna 5, fila 10
   delay(500);
 
-  apagar(5, 10);   // Apagar el mismo LED
+  apagar(5, 10);  // Apagar el mismo LED
   delay(500);
 }
