@@ -24,12 +24,12 @@ const uint8_t filas[MATRIX_ROWS] = {
 // === FUNCIONES ===
 void prenderFila(uint8_t fila)
 {
-  digitalWrite(filas[fila], LOW);
+  digitalWrite(filas[fila], HIGH);
 }
 
 void apagarFila(uint8_t fila)
 {
-  digitalWrite(filas[fila], HIGH);
+  digitalWrite(filas[fila], LOW);
 }
 
 void prenderLed(uint8_t x, uint8_t y)
