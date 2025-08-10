@@ -32,14 +32,14 @@ const uint8_t filas[MATRIX_ROWS] = {
 uint8_t ledmatrix[MATRIX_ROWS][MATRIX_COLS] = { 0 };
 
 // === FUNCIONES PARA UN SOLO PUNTO ===
-void prender(uint8_t x, uint8_t y) {
+void prenderLed(uint8_t x, uint8_t y) {
   if (x < MATRIX_COLS && y < MATRIX_ROWS) {
     digitalWrite(x, LOW);
     digitalWrite(y, LOW);
   }
 }
 
-void apagar(uint8_t x, uint8_t y) {
+void apagarLed(uint8_t x, uint8_t y) {
   if (x < MATRIX_COLS && y < MATRIX_ROWS) {
     digitalWrite(x, HIGH);
     digitalWrite(y, HIGH);
