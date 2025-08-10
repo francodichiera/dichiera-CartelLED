@@ -192,7 +192,8 @@
         0.0,
         0.65,
         0.8,
-        0.9
+        0.9,
+        1.0
       ],
       "tuning_pattern_settings": {
         "diff_pair_defaults": {
@@ -505,7 +506,7 @@
       "gencad": "",
       "idf": "",
       "netlist": "./",
-      "plot": "",
+      "plot": "C:/Users/franc/Desktop/ESP32+TIPS122 Version 2/ESP32+TIPS/",
       "pos_files": "",
       "specctra_dsn": "ESP32+TIPS (1).dsn",
       "step": "",
