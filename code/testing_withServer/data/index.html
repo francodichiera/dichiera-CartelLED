@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Control Matriz LED</title>
+  <style>
+    body { font-family: Arial, sans-serif; text-align: center; margin-top: 40px; }
+    h1 { color: #333; }
+    input, button { padding: 10px; font-size: 16px; margin: 5px; }
+  </style>
+</head>
+<body>
+  <h1>Control de Matriz LED</h1>
+  <input type="number" id="fila" placeholder="Fila (0-19)" min="0" max="19">
+  <input type="number" id="columna" placeholder="Columna (0-95)" min="0" max="95">
+  <button onclick="encender()">Encender</button>
+  <button onclick="apagar()">Apagar</button>
+
+  <script>
+    function encender() {
+      let fila = document.getElementById('fila').value;
+      let col = document.getElementById('columna').value;
+      fetch(`/led?fila=${fila}&col=${col}&estado=1`);
+    }
+    function apagar() {
+      let fila = document.getElementById('fila').value;
+      let col = document.getElementById('columna').value;
+      fetch(`/led?fila=${fila}&col=${col}&estado=0`);
+    }
+  </script>
+</body>
+</html>
