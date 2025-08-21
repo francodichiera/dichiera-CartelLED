@@ -1,7 +1,7 @@
 #include <Arduino.h>
 #include <ShiftRegister74HC595.h> // Librería para controlar registros de desplazamiento 74HC595
 #include <Adafruit_GFX.h>         // Librería gráfica base de Adafruit
-#include <Fonts/FreeSans9pt7b.h>  // Fuente 9 puntos (tipo sans serif)
+#include <Fonts/FreeSans12pt7b.h>  // Fuente 9 puntos (tipo sans serif)
 
 // === CONFIGURACIÓN DE PINES ===
 #define DATA_PIN 23   // Pin de datos (DS) hacia el primer 74HC595
@@ -77,7 +77,7 @@ void refrescarMatrizCompleta() {
     prenderFila(fila);
 
     // Tiempo que la fila permanece encendida (controla brillo y parpadeo)
-    delayMicroseconds(300);
+    delayMicroseconds(200);
 
     // Apaga la fila antes de pasar a la siguiente
     apagarFila(fila);
@@ -97,7 +97,7 @@ void setup() {
   sr.setAllLow(); // Apaga todas las columnas al inicio
 
   // Configuración de la pantalla virtual
-  display.setFont(&FreeSans9pt7b); // Selecciona fuente
+  display.setFont(&FreeSans12pt7b); // Selecciona fuente
   display.setTextColor(1);         // "Color" 1 = encendido
   display.setTextWrap(false);      // Sin salto automático de línea
 }
@@ -106,11 +106,11 @@ void loop() {
   static unsigned long lastScroll = 0;
 
   // Solo actualizamos el texto cada 75 ms para el efecto de scroll suave
-  if (millis() - lastScroll > 75) {
+  if (millis() - lastScroll > 100) {
     lastScroll = millis();
 
     display.clear();          // Limpia framebuffer
-    display.setCursor(x, 13); // Posición del texto (X variable para scroll, Y ajustada para altura de fuente)
+    display.setCursor(x, 17); // Posición del texto (X variable para scroll, Y ajustada para altura de fuente)
     display.print(mensaje);   // Escribe el mensaje en el framebuffer
 
     // Calcula ancho del texto para saber cuándo reiniciar scroll
