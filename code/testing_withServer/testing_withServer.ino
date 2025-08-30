@@ -3,7 +3,7 @@
 #include <ESPmDNS.h>
 #include <ShiftRegister74HC595.h>
 #include <Adafruit_GFX.h>
-#include <Fonts/FreeSans11pt7b.h> //https://rop.nl/truetype2gfx/ FONTS PAGE
+#include <Fonts/LEMONMILK_Regular10pt7b.h> //https://rop.nl/truetype2gfx/ FONTS PAGE
 #include <Preferences.h>
 
 // === CREDENCIALES WiFi ===
@@ -72,7 +72,7 @@ void refrescarMatrizCompleta() {
     }
 
     prenderFila(f);          // Enciende la fila actual
-    delayMicroseconds(150);  // Pequeña pausa para que se vea
+    delayMicroseconds(200);  // Pequeña pausa para que se vea
     apagarFila(f);           // Apaga la fila antes de la siguiente
   }
 }
@@ -147,7 +147,7 @@ void setup() {
   sr.setAllLow();
 
   // Configurar display
-  display.setFont(&FreeSans11pt7b);  // Fuente
+  display.setFont(&LEMONMILK_Regular10pt7b);  // Fuente
   display.setTextColor(1);           // Color blanco (LED encendido)
   display.setTextWrap(false);        // No cortar líneas
 
