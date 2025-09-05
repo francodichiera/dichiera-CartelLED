@@ -15,11 +15,11 @@ const char *password = "12345678";          // Contraseña de la red WiFi
 #define CLOCK_PIN 18                     // Pin de clock para 74HC595
 #define LATCH_PIN 19                     // Pin de latch para 74HC595
 #define MATRIX_ROWS 18                   // Cantidad de filas de la matriz de LEDs
-#define MATRIX_COLS 24                   // Cantidad de columnas de la matriz de LEDs
+#define MATRIX_COLS 48                   // Cantidad de columnas de la matriz de LEDs
 #define BYTES_PER_ROW (MATRIX_COLS / 8)  // Cantidad de bytes por fila (24/8=3)
 
 // === CONTROL DE REGISTROS 74HC595 ===
-ShiftRegister74HC595<3> sr(DATA_PIN, CLOCK_PIN, LATCH_PIN);  // 3 registros en cascada para 24 columnas
+ShiftRegister74HC595<6> sr(DATA_PIN, CLOCK_PIN, LATCH_PIN);  // 3 registros en cascada para 24 columnas
 
 const uint8_t filas[MATRIX_ROWS] = { 3, 1, 2, 4, 5, 12, 13, 14, 15, 16, 17, 21, 22, 25, 26, 27, 32, 33 };
 // Pines del ESP32 conectados a las filas (a través de TIP122 o transistores)
@@ -59,23 +59,26 @@ void apagarFila(uint8_t f) {
 
 // === MULTIPLEXADO DE LA MATRIZ ===
 void refrescarMatrizCompleta() {
-  // Recorre todas las filas una por una
   for (uint8_t f = 0; f < MATRIX_ROWS; f++) {
-    // Apaga la fila anterior para evitar "fantasmas"
+    // Apagar fila anterior
     apagarFila((f + MATRIX_ROWS - 1) % MATRIX_ROWS);
 
-    // Envía los datos de columnas al registro 74HC595
-    for (uint8_t b = 0; b < MATRIX_COLS; b++) {
-      uint8_t byteCol = b / 8;            // Qué byte corresponde a la columna
-      uint8_t bitMask = 0x80 >> (b % 8);  // Máscara para ese bit
-      sr.set(b, (framebuffer[f][byteCol] & bitMask) ? HIGH : LOW);
+    // Mandar TODOS los bytes de la fila a los registros en un solo update
+    for (uint8_t b = 0; b < BYTES_PER_ROW; b++) {
+      uint8_t data = framebuffer[f][b];
+      for (uint8_t bit = 0; bit < 8; bit++) {
+        sr.setNoUpdate(b * 8 + bit, (data & (0x80 >> bit)) ? HIGH : LOW);
+      }
     }
+    sr.updateRegisters();  // Latch de todos los bits en simultáneo
 
-    prenderFila(f);          // Enciende la fila actual
-    delayMicroseconds(200);  // Pequeña pausa para que se vea
-    apagarFila(f);           // Apaga la fila antes de la siguiente
+    // Encender la fila actual
+    prenderFila(f);
+    delayMicroseconds(50);  // Ajustá este valor para brillo/estabilidad
+    apagarFila(f);
   }
 }
+
 
 // === SERVIDOR HTTP ===
 WiFiServer server(80);  // Servidor web en el puerto 80
