@@ -3,26 +3,25 @@
 #include <ESPmDNS.h>
 #include <ShiftRegister74HC595.h>
 #include <Adafruit_GFX.h>
-#include <Fonts/LEMONMILK_Regular10pt7b.h> //https://rop.nl/truetype2gfx/ FONTS PAGE
+#include <Fonts/LEMONMILK_Regular10pt7b.h>  //https://rop.nl/truetype2gfx/ FONTS PAGE
 #include <Preferences.h>
 
 // === CREDENCIALES WiFi ===
-const char *ssid = "MovistarFibra-4378A0";  // Nombre de la red WiFi
-const char *password = "12345678";          // Contraseña de la red WiFi
+const char *ssid = "CARTEL-LED";    // Nombre de la red WiFi
+const char *password = "12345678";  // Contraseña de la red WiFi
 
 // === PINES DE LA MATRIZ ===
 #define DATA_PIN 23                      // Pin de datos para 74HC595
 #define CLOCK_PIN 18                     // Pin de clock para 74HC595
 #define LATCH_PIN 19                     // Pin de latch para 74HC595
 #define MATRIX_ROWS 18                   // Cantidad de filas de la matriz de LEDs
-#define MATRIX_COLS 48                   // Cantidad de columnas de la matriz de LEDs
+#define MATRIX_COLS 96                   // Cantidad de columnas de la matriz de LEDs
 #define BYTES_PER_ROW (MATRIX_COLS / 8)  // Cantidad de bytes por fila (24/8=3)
 
 // === CONTROL DE REGISTROS 74HC595 ===
-ShiftRegister74HC595<6> sr(DATA_PIN, CLOCK_PIN, LATCH_PIN);  // 3 registros en cascada para 24 columnas
+ShiftRegister74HC595<12> sr(DATA_PIN, CLOCK_PIN, LATCH_PIN);  // 3 registros en cascada para 24 columnas
 
-const uint8_t filas[MATRIX_ROWS] = { 3, 1, 2, 4, 5, 12, 13, 14, 15, 16, 17, 21, 22, 25, 26, 27, 32, 33 };
-// Pines del ESP32 conectados a las filas (a través de TIP122 o transistores)
+const uint8_t filas[MATRIX_ROWS] = { 3, 1, 2, 4, 5, 12, 13, 14, 15, 16, 17, 21, 22, 25, 26, 27, 32, 33 };  // Pines del ESP32 conectados a las filas (a través de TIP122 o transistores)
 
 uint8_t framebuffer[MATRIX_ROWS][BYTES_PER_ROW];  // Framebuffer donde se almacena qué LEDs deben estar encendidos
 
@@ -57,33 +56,31 @@ void apagarFila(uint8_t f) {
   digitalWrite(filas[f], LOW);  // Desactiva la fila f
 }
 
-// === MULTIPLEXADO DE LA MATRIZ ===
 void refrescarMatrizCompleta() {
   for (uint8_t f = 0; f < MATRIX_ROWS; f++) {
-    // Apagar fila anterior
-    apagarFila((f + MATRIX_ROWS - 1) % MATRIX_ROWS);
+    // Apagar todas las filas
+    for (uint8_t i = 0; i < MATRIX_ROWS; i++) apagarFila(i);
 
-    // Mandar TODOS los bytes de la fila a los registros en un solo update
+    // Mandar datos de la fila
     for (uint8_t b = 0; b < BYTES_PER_ROW; b++) {
       uint8_t data = framebuffer[f][b];
       for (uint8_t bit = 0; bit < 8; bit++) {
         sr.setNoUpdate(b * 8 + bit, (data & (0x80 >> bit)) ? HIGH : LOW);
       }
     }
-    sr.updateRegisters();  // Latch de todos los bits en simultáneo
+    sr.updateRegisters();
 
     // Encender la fila actual
     prenderFila(f);
-    delayMicroseconds(50);  // Ajustá este valor para brillo/estabilidad
+    delayMicroseconds(200);  // probá 50–100 µs
     apagarFila(f);
   }
 }
 
-
 // === SERVIDOR HTTP ===
 WiFiServer server(80);  // Servidor web en el puerto 80
 
-#define BUF_SIZE 2048
+#define BUF_SIZE 4096
 char curMessage[BUF_SIZE] = "";    // Mensaje actual que se muestra
 char newMessage[BUF_SIZE] = "";    // Nuevo mensaje recibido
 bool newMessageAvailable = false;  // Flag para indicar si hay un nuevo mensaje
@@ -95,8 +92,36 @@ Preferences prefs;
 
 // === PÁGINA WEB QUE MANEJA EL CARTEL ===
 const char WebResponse[] = "HTTP/1.1 200 OK\nContent-Type: text/html\n\n";
-const char WebPage[] =
-  "<!DOCTYPE html><html><head><meta charset='UTF-8'><meta name='viewport' content='width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no'><title>CARTEL INTELIGENTE HUERGO</title><link href='https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&family=DotGothic16&display=swap' rel='stylesheet'><style>body{font-family:'Poppins',sans-serif;background:#f3f0ff;color:#2a1a66;text-align:center;margin:0;padding:0}h1{background:linear-gradient(90deg,#3399ff,#9933ff);color:#fff;padding:15px 0;margin:0;font-size:1.5em;letter-spacing:1px}form{padding:20px;background:linear-gradient(145deg,#e6e0ff,#fff);margin:20px auto;width:90%;max-width:420px;border-radius:15px;box-shadow:0 8px 20px rgba(0,0,0,.15);text-align:center;transition:.3s}form:hover{box-shadow:0 10px 25px rgba(0,0,0,.25)}input[type=text]{width:95%;font-size:16px;padding:10px;margin:10px 0;border:2px solid #3399ff;border-radius:8px;transition:.3s;outline:none;font-family:'Poppins',sans-serif}input[type=text]:focus{border-color:#9933ff;box-shadow:0 0 8px rgba(153,51,255,.4)}input[type=range]{-webkit-appearance:none;width:95%;height:10px;border-radius:5px;background:#ccc;outline:none}input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:22px;height:22px;border-radius:50%;background:#3399ff;cursor:pointer;box-shadow:0 2px 6px rgba(0,0,0,.3);transition:.3s}input[type=range]::-webkit-slider-thumb:hover{background:#9933ff}button{padding:12px 25px;margin-top:10px;background:linear-gradient(90deg,#3399ff,#9933ff);color:#fff;border:none;border-radius:8px;cursor:pointer;box-shadow:0 4px 12px rgba(0,0,0,.2);transition:.3s;font-size:1em;font-family:'Poppins',sans-serif}button:hover{background:linear-gradient(90deg,#0055aa,#6600cc);box-shadow:0 6px 15px rgba(0,0,0,.3)}#speedVal{font-weight:bold;color:#2a1a66;display:inline-block;width:50px;text-align:center;font-family:'Poppins',sans-serif}.demoScroll{margin:25px auto;padding:10px;width:90%;max-width:420px;background:#000;border:2px solid #3399ff;border-radius:10px;overflow:hidden;height:50px;display:flex;align-items:center;position:relative}.ledText{color:#0af;font-family:'DotGothic16',monospace;font-size:1.6em;font-weight:bold;letter-spacing:2px;text-shadow:none;white-space:nowrap;position:absolute;will-change:transform}footer{margin-top:30px;color:#9933ff;font-size:.9em;font-family:'Poppins',sans-serif}@media(max-width:500px){input[type=text],input[type=range]{width:95%}}</style><script>let animId=null;function SendData(){var msg=encodeURIComponent(document.frm.Message.value);var SD=document.frm.ScrollType.value;var SP=document.frm.Speed.value;window.location='/?MSG='+msg+'&SD='+SD+'&SP='+SP}function updateSpeed(val){document.getElementById('speedVal').innerText=val;updateDemo()}function updateDemo(){const txt=document.frm.Message.value||'Vista previa del mensaje';const dir=document.frm.ScrollType.value;const spd=document.frm.Speed.value;const el=document.getElementById('demoText');el.textContent=txt;if(animId)cancelAnimationFrame(animId);const parent=el.parentNode;let pos=(dir==='L')?parent.offsetWidth:-el.offsetWidth;function step(){let velocidad=(210-spd)/20;pos+=(dir==='L'?-1:1)*velocidad;if((dir==='L'&&pos<-el.offsetWidth)||(dir==='R'&&pos>parent.offsetWidth)){pos=(dir==='L')?parent.offsetWidth:-el.offsetWidth}el.style.transform='translateX('+pos+'px)';animId=requestAnimationFrame(step)}step()}window.onload=updateDemo;</script></head><body><h1>CARTEL INTELIGENTE HUERGO</h1><form name='frm'>Mensaje:<br><input type='text' name='Message' maxlength='255' oninput='updateDemo()'><br><br><input type='radio' name='ScrollType' value='L' checked onclick='updateDemo()'>Izquierda<input type='radio' name='ScrollType' value='R' onclick='updateDemo()'>Derecha<br><br>Velocidad: <span id='speedVal'>100</span><br><input type='range' name='Speed' min='10' max='200' value='100' oninput='updateSpeed(this.value)'><br><br></form><div class='demoScroll'><div id='demoText' class='ledText'>Vista previa del mensaje</div></div><button onclick='SendData()'>Enviar</button><footer>Realizado por FRANCO DICHIERA 2025</footer></body></html>";
+const char WebPage[] = "<!DOCTYPE html><html><head><meta charset='UTF-8'><meta name='viewport' content='width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no'><title>CARTEL INTELIGENTE HUERGO</title><style>body{font-family:sans-serif;background:#f3f0ff;color:#2a1a66;text-align:center;margin:0;padding:0;}h1{background:linear-gradient(90deg,#3399ff,#9933ff);color:white;padding:15px 0;margin:0;font-size:1.5em;letter-spacing:1px;}form{padding:20px;background:linear-gradient(145deg,#e6e0ff,#ffffff);margin:20px auto;width:90%;max-width:420px;border-radius:15px;box-shadow:0 8px 20px rgba(0,0,0,0.15);text-align:center;transition:0.3s;}form:hover{box-shadow:0 10px 25px rgba(0,0,0,0.25);}input[type=text]{width:95%;font-size:16px;padding:10px;margin:10px 0;border:2px solid #3399ff;border-radius:8px;transition:0.3s;outline:none;font-family:sans-serif;}input[type=text]:focus{border-color:#9933ff;box-shadow:0 0 8px rgba(153,51,255,0.4);}input[type=range]{-webkit-appearance:none;width:95%;height:10px;border-radius:5px;background:#ccc;outline:none;}input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:22px;height:22px;border-radius:50%;background:#3399ff;cursor:pointer;box-shadow:0 2px 6px rgba(0,0,0,0.3);transition:0.3s;}input[type=range]::-webkit-slider-thumb:hover{background:#9933ff;}button{padding:12px 25px;margin-top:10px;background:linear-gradient(90deg,#3399ff,#9933ff);color:white;border:none;border-radius:8px;cursor:pointer;box-shadow:0 4px 12px rgba(0,0,0,0.2);transition:0.3s;font-size:1em;font-family:sans-serif;}button:hover{background:linear-gradient(90deg,#0055aa,#6600cc);box-shadow:0 6px 15px rgba(0,0,0,0.3);}#speedVal{font-weight:bold;color:#2a1a66;display:inline-block;width:50px;text-align:center;font-family:sans-serif;}.demoScroll{margin:25px auto;padding:10px;width:90%;max-width:420px;background:black;border:2px solid #3399ff;border-radius:10px;overflow:hidden;height:50px;display:flex;align-items:center;position:relative;}.ledText{color:#00aaff;font-family:monospace;font-size:1.6em;font-weight:bold;letter-spacing:2px;text-shadow:none;white-space:nowrap;position:absolute;will-change:transform;}footer{margin-top:30px;color:#9933ff;font-size:0.9em;font-family:sans-serif;}@media(max-width:500px){input[type=text],input[type=range]{width:95%;}}</style><script>let animId=null;function SendData(){var msg=encodeURIComponent(document.frm.Message.value);var SD=document.frm.ScrollType.value;var SP=document.frm.Speed.value;window.location='/?MSG='+msg+'&SD='+SD+'&SP='+SP;}function updateSpeed(val){document.getElementById('speedVal').innerText=val;updateDemo();}function updateDemo(){const txt=document.frm.Message.value||'Vista previa del mensaje';const dir=document.frm.ScrollType.value;const spd=document.frm.Speed.value;const el=document.getElementById('demoText');el.textContent=txt;if(animId) cancelAnimationFrame(animId);const parent=el.parentNode;let pos=(dir==='L')?parent.offsetWidth:-el.offsetWidth;function step(){let velocidad=(210-spd)/20;pos+=(dir==='L'?-1:1)*velocidad;if((dir==='L'&&pos<-el.offsetWidth)||(dir==='R'&&pos>parent.offsetWidth)){pos=(dir==='L')?parent.offsetWidth:-el.offsetWidth;}el.style.transform='translateX('+pos+'px)';animId=requestAnimationFrame(step);}step();}window.onload=updateDemo;</script></head><body><h1>CARTEL INTELIGENTE HUERGO</h1><form name='frm'>Mensaje:<br><input type='text' name='Message' maxlength='255' oninput='updateDemo()'><br><br><input type='radio' name='ScrollType' value='L' checked onclick='updateDemo()'>Izquierda<input type='radio' name='ScrollType' value='R' onclick='updateDemo()'>Derecha<br><br>Velocidad: <span id='speedVal'>100</span><br><input type='range' name='Speed' min='10' max='200' value='100' oninput='updateSpeed(this.value)'><br><br></form><div class='demoScroll'><div id='demoText' class='ledText'>Vista previa del mensaje</div></div><button onclick='SendData()'>Enviar</button><footer>Realizado por FRANCO DICHIERA 2025</footer></body></html>";
+
+// Reemplaza caracteres acentuados por su versión sin tilde
+void normalizarTexto(char *str) {
+  char *p = str;
+  while (*p) {
+    unsigned char c = *p;
+    if (c == 0xC3) {  // Inicio de secuencia UTF-8 para tildes
+      unsigned char next = *(p + 1);
+      switch (next) {
+        case 0xA1: *p = 'a'; break;  // á
+        case 0xA9: *p = 'e'; break;  // é
+        case 0xAD: *p = 'i'; break;  // í
+        case 0xB3: *p = 'o'; break;  // ó
+        case 0xBA: *p = 'u'; break;  // ú
+        case 0x81: *p = 'A'; break;  // Á
+        case 0x89: *p = 'E'; break;  // É
+        case 0x8D: *p = 'I'; break;  // Í
+        case 0x93: *p = 'O'; break;  // Ó
+        case 0x9A: *p = 'U'; break;  // Ú
+        case 0xB1: *p = 'n'; break;  // ñ
+        case 0x91: *p = 'N'; break;  // Ñ
+        default: *p = ' '; break;    // Caracter desconocido → espacio
+      }
+      // Saltar el segundo byte UTF-8
+      memmove(p + 1, p + 2, strlen(p + 2) + 1);
+    }
+    p++;
+  }
+}
 
 
 // === FUNCIONES DE UTILIDAD ===
@@ -125,6 +150,7 @@ void getData(char *req) {
       }
     }
     *dst = '\0';
+    normalizarTexto(newMessage);
     newMessageAvailable = strlen(newMessage) > 0;
   }
   // Buscar dirección (SD=L o R)
@@ -132,7 +158,11 @@ void getData(char *req) {
   if (p) scrollRight = (*(p + 3) == 'R');
   // Buscar velocidad (SP=xxx)
   p = strstr(req, "SP=");
-  if (p) scrollSpeed = atoi(p + 3);
+
+  if (p) {
+    int val = atoi(p + 3);
+    scrollSpeed = 210 - val;  // Invertimos la relación: más barra = más rápido
+  }
 }
 
 // === VARIABLES DE SCROLL ===
@@ -151,26 +181,21 @@ void setup() {
 
   // Configurar display
   display.setFont(&LEMONMILK_Regular10pt7b);  // Fuente
-  display.setTextColor(1);           // Color blanco (LED encendido)
-  display.setTextWrap(false);        // No cortar líneas
+  display.setTextColor(1);                    // Color blanco (LED encendido)
+  display.setTextWrap(false);                 // No cortar líneas
 
-  // Conexión WiFi
-  WiFi.begin(ssid, password);
-  while (WiFi.status() != WL_CONNECTED) {
-    delay(500);
-    Serial.print(".");
-  }
-  Serial.println("\nWiFi conectado. IP: " + WiFi.localIP().toString());
+  WiFi.mode(WIFI_AP);              // Configura el ESP32 como Access Point
+  WiFi.softAP(ssid, password, 1);  // Crea la red "cartel_led"
+  Serial.print("IP del AP: ");
+  Serial.println(WiFi.softAPIP());  // Normalmente 192.168.4.1
 
-  // Iniciar mDNS → acceso con "cartelhuergo.local"
-  if (MDNS.begin("cartelhuergo")) Serial.println("mDNS iniciado: cartelhuergo.local");
-  else Serial.println("Error iniciando mDNS");
+  MDNS.begin("cartelhuergo");
 
   server.begin();  // Inicia servidor HTTP
 
   // Cargar mensaje y configuraciones guardadas en Preferences
   prefs.begin("cartel", false);
-  String savedMsg = prefs.getString("mensaje", "BIENVENIDOS ELECTRONICA EXPO HUERGO 2025");
+  String savedMsg = prefs.getString("mensaje", "ELECTRONICA 2025");
   savedMsg.toCharArray(curMessage, BUF_SIZE);
   scrollSpeed = prefs.getUInt("speed", 100);
   scrollRight = prefs.getBool("dir", false);
@@ -184,6 +209,7 @@ void loop() {
   static int idx = 0;
 
   if (client) {
+
     while (client.connected() && client.available()) {
       char c = client.read();
       if (idx < BUF_SIZE - 1) req[idx++] = c;

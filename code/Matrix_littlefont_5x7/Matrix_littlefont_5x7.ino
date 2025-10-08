@@ -7,10 +7,10 @@
 #define LATCH_PIN 19  // STCP
 
 #define MATRIX_ROWS 18
-#define MATRIX_COLS 24
+#define MATRIX_COLS 96
 
 // Instancia de 3 registros 74HC595 (para 24 columnas)
-ShiftRegister74HC595<3> sr(DATA_PIN, CLOCK_PIN, LATCH_PIN);
+ShiftRegister74HC595<12> sr(DATA_PIN, CLOCK_PIN, LATCH_PIN);
 
 // Pines de filas (controladas por TIP122)
 const uint8_t filas[MATRIX_ROWS] = {
@@ -174,15 +174,21 @@ void scrollIzquierda() {
 // ==============================
 void refrescarMatriz() {
   for (int fila = 0; fila < MATRIX_ROWS; fila++) {
+    apagarFila(fila); // Apagamos fila antes de cambiar columnas
+  }
+
+  for (int fila = 0; fila < MATRIX_ROWS; fila++) {
+    // Preparamos los datos de las columnas
     sr.setAllLow();
-    prenderFila(fila);
     for (int col = 0; col < MATRIX_COLS; col++) {
       sr.set(col, buffer[fila][col] ? HIGH : LOW);
     }
-    delayMicroseconds(100);
+    prenderFila(fila);
+    delayMicroseconds(50); // Mucho más rápido para que sea invisible
     apagarFila(fila);
   }
 }
+
 
 // ==============================
 // Configuración

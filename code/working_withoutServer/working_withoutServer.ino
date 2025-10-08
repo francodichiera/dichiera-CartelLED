@@ -1,4 +1,5 @@
 
+
 #include <Arduino.h>
 #include <ShiftRegister74HC595.h> // Librería para controlar registros de desplazamiento 74HC595
 #include <Adafruit_GFX.h>         // Librería gráfica base de Adafruit
@@ -11,11 +12,11 @@
 
 // === CONFIGURACIÓN DE MATRIZ LED ===
 #define MATRIX_ROWS 18               // Cantidad de filas físicas en la matriz
-#define MATRIX_COLS 24              // Cantidad de columnas físicas en la matriz
+#define MATRIX_COLS 96              // Cantidad de columnas físicas en la matriz
 #define BYTES_PER_ROW (MATRIX_COLS / 8)  // Cada fila se representa en bytes (3 bytes para 24 columnas)
 
 // Creamos instancia para manejar 3 registros 74HC595 (cada uno controla 8 columnas)
-ShiftRegister74HC595<6> sr(DATA_PIN, CLOCK_PIN, LATCH_PIN);
+ShiftRegister74HC595<12> sr(DATA_PIN, CLOCK_PIN, LATCH_PIN);
 
 // Pines que controlan las 18 filas a través de transistores TIP122
 const uint8_t filas[MATRIX_ROWS] = {
@@ -78,7 +79,7 @@ void refrescarMatrizCompleta() {
     prenderFila(fila);
 
     // Tiempo que la fila permanece encendida (controla brillo y parpadeo)
-    delayMicroseconds(200);
+    delayMicroseconds(500);
 
     // Apaga la fila antes de pasar a la siguiente
     apagarFila(fila);
@@ -86,7 +87,7 @@ void refrescarMatrizCompleta() {
 }
 
 // === TEXTO A MOSTRAR ===
-const char *mensaje = "BIENVENIDOS ELECTRONICA";
+const char *mensaje = "HOLA";
 int16_t x = MATRIX_COLS;  // Posición inicial del texto (empieza fuera de la pantalla, a la derecha)
 
 void setup() {

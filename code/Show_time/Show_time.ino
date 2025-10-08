@@ -1,13 +1,13 @@
 #include <Arduino.h>
 #include <ShiftRegister74HC595.h> // Librería para registros de desplazamiento
 #include <Adafruit_GFX.h>         // Librería gráfica base
-#include <Fonts/FreeSans11pt7b.h> // Fuente para la matriz
+#include <Fonts/LEMONMILK_Regular10pt7b.h> // Fuente para la matriz
 #include <WiFi.h>
 #include "time.h"
 
 // === CONFIGURACIÓN DE WI-FI ===
 const char* ssid = "MovistarFibra-4378A0";        // Cambia por tu SSID
-const char* password = "12345678"; // Cambia por tu contraseña
+const char* password = "12345678";     // Cambia por tu contraseña
 
 // === CONFIGURACIÓN NTP ===
 const char* ntpServer = "pool.ntp.org";
@@ -20,10 +20,10 @@ const int daylightOffset_sec = 0;
 #define LATCH_PIN 19
 
 #define MATRIX_ROWS 18
-#define MATRIX_COLS 24
+#define MATRIX_COLS 48
 #define BYTES_PER_ROW (MATRIX_COLS / 8)
 
-ShiftRegister74HC595<3> sr(DATA_PIN, CLOCK_PIN, LATCH_PIN);
+ShiftRegister74HC595<12> sr(DATA_PIN, CLOCK_PIN, LATCH_PIN);
 
 const uint8_t filas[MATRIX_ROWS] = {
   3, 1, 2, 4, 5,
@@ -60,17 +60,23 @@ void apagarFila(uint8_t fila) { digitalWrite(filas[fila], LOW); }
 
 // === REFRESCO DE MATRIZ ===
 void refrescarMatrizCompleta() {
-  for (uint8_t fila = 0; fila < MATRIX_ROWS; fila++) {
-    apagarFila((fila + MATRIX_ROWS - 1) % MATRIX_ROWS);
-    for (uint8_t bit = 0; bit < MATRIX_COLS; bit++) {
-      uint8_t colByte = bit / 8;
-      uint8_t bitMask = 0x80 >> (bit % 8);
-      bool ledOn = (framebuffer[fila][colByte] & bitMask) != 0;
-      sr.set(bit, ledOn ? HIGH : LOW);
+  for (uint8_t f = 0; f < MATRIX_ROWS; f++) {
+    // Apagar la fila anterior
+    apagarFila((f + MATRIX_ROWS - 1) % MATRIX_ROWS);
+
+    // Mandar TODOS los bytes de la fila a los registros en un solo update
+    for (uint8_t b = 0; b < BYTES_PER_ROW; b++) {
+      uint8_t data = framebuffer[f][b];
+      for (uint8_t bit = 0; bit < 8; bit++) {
+        sr.setNoUpdate(b * 8 + bit, (data & (0x80 >> bit)) ? HIGH : LOW);
+      }
     }
-    prenderFila(fila);
-    delayMicroseconds(200);
-    apagarFila(fila);
+    sr.updateRegisters();  // Latch de todos los bits en simultáneo
+
+    // Encender la fila actual
+    prenderFila(f);
+    delayMicroseconds(50);  // Ajustá este valor para brillo/estabilidad
+    apagarFila(f);
   }
 }
 
@@ -99,7 +105,7 @@ void setup() {
   sr.setAllLow();
 
   // Configura pantalla
-  display.setFont(&FreeSans11pt7b);
+  display.setFont(&LEMONMILK_Regular10pt7b);
   display.setTextColor(1);
   display.setTextWrap(false);
 
