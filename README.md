@@ -1,20 +1,17 @@
 
 # Cartel LED inteligente Proyecto Final 2025
 ###
-<div style="text-align: center;">
+<p align="center">
+  <img src="imgs/1.gif" alt="Imagen 1" width="80%">
+</p>
 
-  <!-- Imagen 1 grande arriba -->
-  <div style="width: 80%; margin: 0 auto;">
-    <img src="imgs/1.gif" alt="Imagen 1" style="width: 100%; height: auto;" />
-  </div>
+<table align="center">
+  <tr>
+    <td><img src="imgs/3.jpeg" alt="Imagen 3" width="250"></td>
+    <td><img src="imgs/4.jpeg" alt="Imagen 4" width="250"></td>
+  </tr>
+</table>
 
-  <!-- Imágenes 3 y 4 abajo, más pequeñas -->
-  <div style="display: flex; justify-content: center; gap: 2%; margin-top: 20px;">
-    <img src="imgs/3.jpeg" alt="Imagen 3" style="width: 30%; height: auto;" />
-    <img src="imgs/4.jpeg" alt="Imagen 4" style="width: 30%; height: auto;" />
-  </div>
-
-</div>
 
 
 ###
