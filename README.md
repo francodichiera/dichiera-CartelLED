@@ -24,13 +24,14 @@
 
 - CON UNAS DIMENSIONES DE LA ESTRUCTURA DE: 1.7m x 40cm.
 
+## Agradecimientos
 
+Antes de pasar a la explicacion, quiero agradecer especialmente al **Prof. Ing. Facundo Luzko** por su importante ayuda y guía en la programación del cartel, al **Prof. Ricardo Malvasio** por su valiosa orientación y colaboración durante el desarrollo del proyecto, y a **mi viejo**, por su apoyo incondicional en todo momento.
 
 # Resumen
 
 Este repositorio contiene el firmware para un cartel LED multiplexado con ESP32. Usa 3 registros 74HC595 en cascada para controlar 24 columnas y 18 pines del ESP32 (a través de transistores TIP122 o drivers) para seleccionar filas. El microcontrolador corre un servidor web simple que permite enviar el texto que se desplaza horizontalmente (scroll), elegir dirección y velocidad y persiste la configuración en flash con `Preferences`.
 
-----------
 
 # Características
 
