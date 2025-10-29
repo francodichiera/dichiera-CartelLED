@@ -4,25 +4,18 @@
 <div style="text-align: center;">
 
   <!-- Imagen 1 grande arriba -->
- <div style="text-align: center;">
-
-  <!-- Imagen 1 grande arriba -->
   <div style="width: 80%; margin: 0 auto;">
     <img src="imgs/1.gif" alt="Imagen 1" style="width: 100%; height: auto;" />
   </div>
-  <!-- Imagen 2 debajo de la 1, rotada 90 grados -->
-  <div style="width: 65%; margin:20px auto;">
-    <img src="imgs/2.gif" alt="Imagen 2" 
-         style="width: 70%; height: auto; transform: rotate(270deg); display: block; margin: 0 auto;" />
-  </div>
 
-  <!-- Imágenes 3 y 4 abajo, una al lado de la otra -->
+  <!-- Imágenes 3 y 4 abajo, más pequeñas -->
   <div style="display: flex; justify-content: center; gap: 2%; margin-top: 20px;">
-    <img src="imgs/3.jpeg" alt="Imagen 3" style="width: 49%; height: auto;" />
-    <img src="imgs/4.jpeg" alt="Imagen 4" style="width: 39%; height: auto;" />
+    <img src="imgs/3.jpeg" alt="Imagen 3" style="width: 30%; height: auto;" />
+    <img src="imgs/4.jpeg" alt="Imagen 4" style="width: 30%; height: auto;" />
   </div>
 
 </div>
+
 
 ###
 ## 
